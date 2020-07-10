@@ -91,9 +91,9 @@ func TestSpline1D(t *testing.T) {
 		yVals := Evaluate(locOfKnots, coefficients, xValues, 3)
 
 		// Print out to text file, then load it along side the Julia text file
-		outputToTxt("Test_Output", yVals)
+		outputToTxt("TestOutput", yVals)
 
-		file, err := os.Open("Test_Output.txt")
+		file, err := os.Open("TestOutput.txt")
 		defer file.Close()
 		if err != nil {
 			fmt.Println(err)
@@ -162,9 +162,9 @@ func TestSpline1D(t *testing.T) {
 // 	yVals := Evaluate(locOfKnots, coefficients, xValues, 3)
 
 // 	// Print out to text file, then load it along side the Julia text file
-// 	outputToTxt("Test_Output", yVals)
+// 	outputToTxt("TestOutput", yVals)
 
-// 	file, err := os.Open("Test_Output.txt")
+// 	file, err := os.Open("TestOutput.txt")
 // 	defer file.Close()
 // 	if err != nil {
 // 		fmt.Println(err)

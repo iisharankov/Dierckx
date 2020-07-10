@@ -167,19 +167,3 @@ func MaxOf(vars ...int) int {
 	}
 	return max
 }
-
-
-// Fib returns the nth number in the Fibonacci series.
-// func Fib(n int) int {
-// 	if n < 2 {
-// 			return n
-// 	}
-// 	return Fib(n-1) + Fib(n-2)
-// }
-
-func Temp(n []int) int {
-	if len(n) > 3 {
-		return len(n)
-	}
-	return 0
-}
