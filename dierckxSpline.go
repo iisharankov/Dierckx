@@ -1,6 +1,7 @@
 package dierckx
 
 // #cgo FFLAGS: -fdefault-real-8
+// #cgo LDFLAGS: -lm
 // void splev (double*, int*, double*, int*, double*, double*, int*, int*);
 // void curfit (int*, int*, double*, double*, double*, double*, double*, int*, double*, int*, int*, double*, double*, double*, double*, int*, int*, int*);
 import "C"
