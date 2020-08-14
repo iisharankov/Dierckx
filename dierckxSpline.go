@@ -5,13 +5,8 @@ package dierckx
 // void curfit (int*, int*, double*, double*, double*, double*, double*, int*, double*, int*, int*, double*, double*, double*, double*, int*, int*, int*);
 import "C"
 
-import (
-	"errors"
-	"fmt"
-)
-
 // Spline1D takes in x and y arrays, and ports the data to Direckx to return a spline
-func Spline1D(x, y []float64, k int) ([]float64, []float64, error) {
+func Spline1D(x, y []float64, k int) ([]float64, []float64, int) {
 
 	/*
 		Spline1D ports the given data so it can be ran by the included FORTRAN dierckx library. To do this, we heavily use
@@ -23,7 +18,7 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, error) {
 	*/
 
 	// Used for returning arrays durring errors
-	var emptyArray []float64
+	// var emptyArray []float64
 
 	/*
 		The x and y parameters are arrays of float64, while the C compiler that ports to FORTRAN is an array of C.double.
@@ -50,18 +45,18 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, error) {
 	var s float64 = 0.0
 	var m int = len(x)
 
-	if len(y) != m {
-		return emptyArray, emptyArray, errors.New("length of x and y must match")
-	}
-	if len(w) != m {
-		return emptyArray, emptyArray, errors.New("length of x and w must match")
-	}
-	if !(m > k) {
-		return emptyArray, emptyArray, errors.New("k must be less than length(x)")
-	}
-	if !(1 <= k) || !(k <= 5) {
-		return emptyArray, emptyArray, errors.New("1 <= k = $k <= 5 must hold")
-	}
+	// if len(y) != m {
+	// 	return emptyArray, emptyArray, errors.New("length of x and y must match")
+	// }
+	// if len(w) != m {
+	// 	return emptyArray, emptyArray, errors.New("length of x and w must match")
+	// }
+	// if !(m > k) {
+	// 	return emptyArray, emptyArray, errors.New("k must be less than length(x)")
+	// }
+	// if !(1 <= k) || !(k <= 5) {
+	// 	return emptyArray, emptyArray, errors.New("1 <= k = $k <= 5 must hold")
+	// }
 
 	var nest int = MaxOf(m+k+1, (2*k)+3)
 	var lwrk int = m*(k+1) + nest*(7+(3*k))
@@ -97,25 +92,19 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, error) {
 		[]float64 as the inverse of what we did at the beginning of the function.
 	*/
 	// Change back from list of []_Ctype_double to []float64
-
-	if castOfier != -1 {
-		fmt.Println("Fortran compiled with error of:", castOfier)
-	}
-
 	locOfKnots := make([]float64, len(t))
 	coefficients := make([]float64, len(c))
-
 	for i := range t {
 		locOfKnots[i] = float64(t[i])
 		coefficients[i] = float64(c[i])
 	}
 
 	// Return the arrays
-	return locOfKnots, coefficients, nil
+	return locOfKnots, coefficients, int(castOfier)
 }
 
 //////////////////////////////////////////////////////////////////
-func Evaluate(spline, coefficients, xValues []float64, k int) []float64 {
+func Evaluate(spline, coefficients, xValues []float64, k int) ([]float64, int) {
 
 	CCompatableSpline := make([]C.double, len(spline))
 	CCompatableXValues := make([]C.double, len(xValues))
@@ -148,12 +137,13 @@ func Evaluate(spline, coefficients, xValues []float64, k int) []float64 {
 	// 	// TODO If I use package unsaffe to somehow pass the full array, I don't need to call fortran len(xValues) times!
 	// 	C.splev(&CCompatableSpline[0], &numOfKnots, &CCompatableCoefficients[0], &degree, &CCompatableXValues[i], &y[i], &m, &castOfier) // pass addresses
 	// }
+
 	for i := range listOfYValues {
 		// Convert _Ctype_double to float64  and append to new list that can store it
 		listOfYValues[i] = float64(y[i])
 	}
 
-	return listOfYValues
+	return listOfYValues, int(castOfier)
 }
 
 // MaxOf returns the max parameter passed in
