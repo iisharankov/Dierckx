@@ -40,7 +40,6 @@ var splineTestTable = []Spline1DData{
 	// {"TestData4", []float64{80, 40, 80}, []float64{0, 100, 200}},
 }
 
-
 func TestSpline1D(t *testing.T) {
 
 	// actual := Temp(tt.n)
@@ -71,8 +70,8 @@ func TestSpline1D(t *testing.T) {
 			k = 1
 		}
 		fmt.Println(k)
-		locOfKnots, coefficients, err := Spline1D(timeVals, azPoints, k)
-		if err != nil {
+		locOfKnots, coefficients, errr := Spline1D(timeVals, azPoints, k)
+		if errr != 0 {
 			// ErrorMsg := fmt.Sprintf("Spline1D returned an unexpected error: %v", err)
 			// t.Errorf(ErrorMsg)
 			return
@@ -88,7 +87,7 @@ func TestSpline1D(t *testing.T) {
 		}
 
 		// Send the xValues over to evaluate at each x point point
-		yVals := Evaluate(locOfKnots, coefficients, xValues, 3)
+		yVals, _ := Evaluate(locOfKnots, coefficients, xValues, 3)
 
 		// Print out to text file, then load it along side the Julia text file
 		outputToTxt("TestOutput", yVals)
@@ -108,7 +107,7 @@ func TestSpline1D(t *testing.T) {
 		// Read each line of the two text files and make sure they're identical
 		i := 0
 		for {
-			i ++
+			i++
 			var julia float64
 			var test float64
 
@@ -224,4 +223,3 @@ func lineCounter(r io.Reader) (int, error) {
 
 	}
 }
-

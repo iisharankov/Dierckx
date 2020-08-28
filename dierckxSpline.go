@@ -5,6 +5,7 @@ package dierckx
 // void splev (double*, int*, double*, int*, double*, double*, int*, int*);
 // void curfit (int*, int*, double*, double*, double*, double*, double*, int*, double*, int*, int*, double*, double*, double*, double*, int*, int*, int*);
 import "C"
+import "fmt"
 
 // Spline1D takes in x and y arrays, and ports the data to Direckx to return a spline
 func Spline1D(x, y []float64, k int) ([]float64, []float64, int) {
@@ -39,25 +40,8 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, int) {
 		w[i] = 1
 	}
 
-	// Depreciated parameters left for possible later use
-	// var periodic bool = false
-	// var bc string = "nearest"
-
 	var s float64 = 0.0
 	var m int = len(x)
-
-	// if len(y) != m {
-	// 	return emptyArray, emptyArray, errors.New("length of x and y must match")
-	// }
-	// if len(w) != m {
-	// 	return emptyArray, emptyArray, errors.New("length of x and w must match")
-	// }
-	// if !(m > k) {
-	// 	return emptyArray, emptyArray, errors.New("k must be less than length(x)")
-	// }
-	// if !(1 <= k) || !(k <= 5) {
-	// 	return emptyArray, emptyArray, errors.New("1 <= k = $k <= 5 must hold")
-	// }
 
 	var nest int = MaxOf(m+k+1, (2*k)+3)
 	var lwrk int = m*(k+1) + nest*(7+(3*k))
@@ -74,7 +58,6 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, int) {
 	var ier int32
 
 	// Cast all the above variables created to their C counterpart
-
 	castOfm := C.int(m)
 	castOfk := C.int(k)
 	castOfs := C.double(s)
@@ -85,13 +68,9 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, int) {
 	castOfier := C.int(ier)
 
 	// C.curfit is the name call given to the FORTRAN function that calculates the spline knots and coefficients
-	// a := []C.double{0, m, x, y, w, x[0], x[len(x)-1], k, s, nest, n, t, c, fp, wrk, lwrk, iwrk, ier}
 	C.curfit(&varOfZero, &castOfm, &copyOfX[0], &copyOfY[0], &w[0], &copyOfX[0], &copyOfX[len(x)-1], &castOfk, &castOfs, &castOfnest, &castOfn, &t[0], &c[0], &castOffp, &wrk[0], &castOflwrk, &iwrk[0], &castOfier) // pass addresses
-	/*
-		The above call populated the t and c variables, which now contain the location of all the knots in the spline, and the
-		coefficients (respectively). These two arrays are of type []_Ctype_double, so naturally we must convert them back to
-		[]float64 as the inverse of what we did at the beginning of the function.
-	*/
+	// The above call populated the t and c variables, which now contain the location of all the knots in the spline, and the coefficients (respectively).
+
 	// Change back from list of []_Ctype_double to []float64
 	locOfKnots := make([]float64, len(t))
 	coefficients := make([]float64, len(c))
@@ -104,7 +83,7 @@ func Spline1D(x, y []float64, k int) ([]float64, []float64, int) {
 	return locOfKnots, coefficients, int(castOfier)
 }
 
-//////////////////////////////////////////////////////////////////
+// Evaluate takes a spline and point and returns a value
 func Evaluate(spline, coefficients, xValues []float64, k int) ([]float64, int) {
 
 	CCompatableSpline := make([]C.double, len(spline))
